@@ -16,7 +16,7 @@ class UserAuthController extends Controller
         $data = Validator::make($request -> all(),[
             'name' => 'required|string',
             'email' => 'required|email|string|unique:users',
-            'password' => 'required|min:8'
+            'password' => 'required|min:8',
         ]);
         // :check if data is correct 
         if ($data -> fails()){
@@ -24,17 +24,32 @@ class UserAuthController extends Controller
                 "errors" => $data -> errors()
             ],422);
           }  else {
-            // if it's correct register the user
-            User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password']),
+          
+            if (User::count() === 0){
+                // if it's correct register the user
+                $user =  User::create([
+                'name' => $request-> name,
+                'email' => $request -> email,
+                'password' => Hash::make($request-> password),
             ]);
-            return response() -> json([
-                "message" => 'Account created successfully'
-            ],200);
+                $user -> assignRole('super_admin');
+                return response() -> json([
+                    "message" => 'Account created successfully',
+                    "role" => $user -> roles -> first() -> name,
+                ],200);
+            } 
+            //  register others user if they're not admin without role till admin give it to them
+              $user =  User::create([
+                'name' => $request-> name,
+                'email' => $request -> email,
+                'password' => Hash::make($request-> password),
+            ]);
+                return response() -> json([
+                    "message" => 'Account created successfully',
+                    "role" => "Pending admin",
+                ],200);
+           
           }
-       
     }
     // login funciton
     public function login(Request $request){
@@ -59,6 +74,8 @@ class UserAuthController extends Controller
         $token = $user -> createToken($request -> email) -> plainTextToken;
         return response() -> json([
             "message" => "You loged in successfully",
+            "role" => $user -> roles -> first() ->name,
+            "permission" => $user -> getAllPermissions(),
             "access_token" => $token
         ]);
     }
