@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\User;
+use App\Notifications\StockNotifications;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Notification;
 
 class DashboardController extends Controller
 {
@@ -18,7 +20,7 @@ class DashboardController extends Controller
                     "product_count" => $countProducts,
                     "available_products" => $availableProducts,
                     "total_users" => $total_users
-                ];
+                ];  
             }
             return ["message" => "you're not an admin"];
         }

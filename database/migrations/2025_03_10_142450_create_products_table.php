@@ -17,7 +17,7 @@ return new class extends Migration
             $table -> text('slug');
             $table -> decimal('price');
             $table -> integer('stock');
-            $table->enum('status', ['available', 'out_of_stock']);
+            $table->enum('status', ['available', 'out_of_stock']) -> default('available');
             $table -> foreignId('category_id') -> constrained();
             $table -> timestamp('deleted_at') -> nullable();
             $table->timestamps();
