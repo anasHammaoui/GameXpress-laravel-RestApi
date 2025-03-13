@@ -18,3 +18,5 @@ Route::get('/v1/admin/dashboard',[DashboardController::class, 'index'])
 -> middleware(['auth:sanctum','role:super_admin|product_manager|users_manager']);
 // product managers routes
 Route::get('/v1/admin/products',[ProductController::class, 'index']) -> middleware(['auth:sanctum','role:product_manager']);
+Route::get('/v1/admin/products/{product}',[ProductController::class, 'show']) -> middleware(['auth:sanctum','role:product_manager']);
+Route::post('/v1/admin/products',[ProductController::class,'store'])->middleware(['auth:sanctum','role:product_manager']);
