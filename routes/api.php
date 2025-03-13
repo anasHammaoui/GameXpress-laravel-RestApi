@@ -21,3 +21,4 @@ Route::get('/v1/admin/products',[ProductController::class, 'index']) -> middlewa
 Route::get('/v1/admin/products/{product}',[ProductController::class, 'show']) -> middleware(['auth:sanctum','role:product_manager']);
 Route::post('/v1/admin/products',[ProductController::class,'store'])->middleware(['auth:sanctum' ,'role:product_manager']);
 Route::put('/v1/admin/products/{product}',[ProductController::class,'update'])->middleware(['auth:sanctum' ,'role:product_manager']);
+Route::delete('/v1/admin/products/{id}',[ProductController::class, 'destroy']) -> middleware(['auth:sanctum','role:product_manager']);

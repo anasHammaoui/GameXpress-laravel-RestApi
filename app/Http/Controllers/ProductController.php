@@ -138,4 +138,11 @@ class ProductController extends Controller
             "product" => $product
         ],200);
     }
+    // delete a product 
+    public function destroy(Product $product){
+        $product -> delete();
+        return response() -> json([
+            "message" => "product has been deleted successfullly"
+        ],200);
+    }
 }
