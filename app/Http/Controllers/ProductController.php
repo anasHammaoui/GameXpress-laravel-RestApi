@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Product_images;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -31,22 +32,109 @@ class ProductController extends Controller
             "name" => "required",
             "price" => "required|numeric",
             "stock" => "required|integer",
-            "category_id" => "required|integer"
+            "category_id" => "required|integer",
+            "images" => "required|array",
+            "images.*" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:5120"
         ]);
         if ($validate -> fails()){
             return response() -> json([
                 "message"=>$validate -> errors()
             ],422);
         }
-      $product =  Product::create([
+        // stock images names in the array to store it in the ddb
+        $images = [];
+
+        // for each loop to iterate throgh images
+        foreach($request ->file('images') as $image){
+            $imageName = time(). '_'. uniqid().'.' . $image -> getClientOriginalExtension();
+            $image -> storeAs('products_images',$imageName,'public');
+            $imageName = 'products_images/'.$imageName;
+            array_push($images,$imageName);
+        }
+        $product =  Product::create([
             "name" => $request -> name,
             "slug" => Str::slug($request -> name),
             "price" => $request -> price,
             "stock" => $request -> stock,
             "category_id" => $request -> category_id
         ]);
+        foreach($images as $index => $value){
+           if ($index=== 0){
+            Product_images::create([
+                'image_url' => $value,
+                'product_id' => $product -> id,
+                'is_primary' => true
+            ]);
+           } else {
+            Product_images::create([
+                'image_url' => $value,
+                'product_id' => $product -> id,
+                'is_primary' => false
+            ]);
+           }
+        }
+      
         return response() -> json([
             "message" => "product created successfullly",
+            "product" => $product
+        ],200);
+    }
+    public function test(Request $request){
+        dd($request);
+    }
+    // update a product
+    public function update(Product $product, Request $request){
+        $validate = Validator::make($request -> all(),[
+            "name" => "required",
+            "price" => "required|numeric",
+            "stock" => "required|integer",
+            "category_id" => "required|integer",
+            "images" => "required|array",
+            "images.*" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:5120"
+        ]);
+        if ($validate -> fails()){
+            return response() -> json([
+                "message"=>$validate -> errors()
+            ],422);
+        }
+        // edit the product
+          // edit product in the db
+          $product -> name = $request -> name;
+          $product -> slug = Str::slug($request -> name);
+          $product -> price =  $request -> price;
+          $product -> stock = $request -> stock;
+          $product -> category_id = $request -> category_id;
+
+        if ($request -> hasFile('images')){
+    // stock images names in the array to store it in the ddb
+        $images = [];
+
+        // for each loop to iterate throgh images
+            foreach($request ->file('images') as $image){
+                $imageName = time(). '_'. uniqid().'.' . $image -> getClientOriginalExtension();
+                $image -> storeAs('products_images',$imageName,'public');
+                $imageName = 'products_images/'.$imageName;
+                array_push($images,$imageName);
+            }
+            foreach($images as $index => $value){
+                if ($index=== 0){
+                 Product_images::create([
+                     'image_url' => $value,
+                     'product_id' => $product -> id,
+                     'is_primary' => true
+                 ]);
+                } else {
+                 Product_images::create([
+                     'image_url' => $value,
+                     'product_id' => $product -> id,
+                     'is_primary' => false
+                 ]);
+                }
+             }
+        }
+      
+        return response() -> json([
+            "message" => "product has been edited successfullly",
             "product" => $product
         ],200);
     }
