@@ -102,6 +102,20 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (auth('sanctum')->user()->can('delete_categories')) {
+            $category = Category::find($id);
+            
+            if (!$category) {
+                return response()->json(['message' => 'Category not found'], 404);
+            }
+            
+            $category->delete();
+            
+            return response()->json(['message' => 'Category deleted successfully'], 200);
+        }
+        
+        return response()->json([
+            'message' => 'You don\'t have access to delete categories'
+        ], 403);
     }
 }
