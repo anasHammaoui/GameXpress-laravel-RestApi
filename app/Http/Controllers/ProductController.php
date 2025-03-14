@@ -16,7 +16,7 @@ class ProductController extends Controller
             $products = Product::all();
         return response() -> json($products,200);
         }
-        return abort(403);
+        return response() -> json(["message" => "failed to get all products"],403);
     }
     // show a specific prouct
     public function show(Product $product){
@@ -104,6 +104,7 @@ class ProductController extends Controller
           $product -> price =  $request -> price;
           $product -> stock = $request -> stock;
           $product -> category_id = $request -> category_id;
+          $product -> save();
 
         if ($request -> hasFile('images')){
     // stock images names in the array to store it in the ddb
@@ -115,6 +116,15 @@ class ProductController extends Controller
                 $image -> storeAs('products_images',$imageName,'public');
                 $imageName = 'products_images/'.$imageName;
                 array_push($images,$imageName);
+            }
+            // Delete old images from storage and database
+            foreach($product->images as $image) {
+                // Remove file from storage
+                if (file_exists(storage_path('app/public/' . $image->image_url))) {
+                    unlink(storage_path('app/public/' . $image->image_url));
+                }
+                // Delete record from database
+                $image->delete();
             }
             foreach($images as $index => $value){
                 if ($index=== 0){
