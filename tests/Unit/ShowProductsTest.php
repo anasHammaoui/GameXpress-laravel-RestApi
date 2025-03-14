@@ -7,12 +7,12 @@ use Tests\TestCase ;
 
 class ShowProductsTest extends TestCase
 {
-    /**
+    /*
      * A basic unit test example.
      */
     public function test_show_products(): void
     {
         $response = $this -> get('/api/v1/admin/products');
-        $response->assertJsonCount(4);
+        $response->assertStatus(200);
     }
 }

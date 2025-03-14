@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserAuthController;
@@ -17,4 +18,11 @@ Route::post('/v1/admin/logout',[UserAuthController::class,"logout"]) -> middlewa
 Route::get('/v1/admin/dashboard',[DashboardController::class, 'index']) 
 -> middleware(['auth:sanctum','role:super_admin|product_manager|users_manager']);
 // product managers routes
-Route::get('/v1/admin/products',[ProductController::class, 'index']) -> middleware(['auth:sanctum','role:product_manager']);
+Route::middleware(['auth:sanctum','role:product_manager']) -> group(function (){
+    Route::get('/v1/admin/products',[ProductController::class, 'index']);
+    Route::get('/v1/admin/products/{product}',[ProductController::class, 'show']);
+    Route::post('/v1/admin/products',[ProductController::class,'store']);
+    Route::put('/v1/admin/products/{product}',[ProductController::class,'update']);
+    Route::delete('/v1/admin/products/{id}',[ProductController::class, 'destroy']);
+    Route::resource('/v1/admin/categories', CategoryController::class);
+});

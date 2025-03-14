@@ -3,16 +3,156 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Product_images;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 class ProductController extends Controller
 {
+    // show all products
     public function index(){
         // all products
-        $products = Product::all();
-        return response() -> json($products);
+        if (auth('sanctum') -> user() -> can('view_products')){
+            $products = Product::all();
+        return response() -> json($products,200);
+        }
+        return response() -> json(["message" => "failed to get all products"],403);
+    }
+    // show a specific prouct
+    public function show(Product $product){
+        if (auth('sanctum')-> user() -> can('view_products')){
+
+            return response() -> json($product) ;
+        }
+        return abort(403);
+    }
+    // add a product 
+    public function store(Request $request){
+        $validate = Validator::make($request -> all(),[
+            "name" => "required",
+            "price" => "required|numeric",
+            "stock" => "required|integer",
+            "category_id" => "required|integer",
+            "images" => "required|array",
+            "images.*" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:5120"
+        ]);
+        if ($validate -> fails()){
+            return response() -> json([
+                "message"=>$validate -> errors()
+            ],422);
+        }
+        // stock images names in the array to store it in the ddb
+        $images = [];
+
+        // for each loop to iterate throgh images
+        foreach($request ->file('images') as $image){
+            $imageName = time(). '_'. uniqid().'.' . $image -> getClientOriginalExtension();
+            $image -> storeAs('products_images',$imageName,'public');
+            $imageName = 'products_images/'.$imageName;
+            array_push($images,$imageName);
+        }
+        $product =  Product::create([
+            "name" => $request -> name,
+            "slug" => Str::slug($request -> name),
+            "price" => $request -> price,
+            "stock" => $request -> stock,
+            "category_id" => $request -> category_id
+        ]);
+        foreach($images as $index => $value){
+           if ($index=== 0){
+            Product_images::create([
+                'image_url' => $value,
+                'product_id' => $product -> id,
+                'is_primary' => true
+            ]);
+           } else {
+            Product_images::create([
+                'image_url' => $value,
+                'product_id' => $product -> id,
+                'is_primary' => false
+            ]);
+           }
+        }
+      
         return response() -> json([
-            "Products" => $products
+            "message" => "product created successfullly",
+            "product" => $product
+        ],200);
+    }
+    public function test(Request $request){
+        dd($request);
+    }
+    // update a product
+    public function update(Product $product, Request $request){
+        $validate = Validator::make($request -> all(),[
+            "name" => "required",
+            "price" => "required|numeric",
+            "stock" => "required|integer",
+            "category_id" => "required|integer",
+            "images" => "required|array",
+            "images.*" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:5120"
+        ]);
+        if ($validate -> fails()){
+            return response() -> json([
+                "message"=>$validate -> errors()
+            ],422);
+        }
+        // edit the product
+          // edit product in the db
+          $product -> name = $request -> name;
+          $product -> slug = Str::slug($request -> name);
+          $product -> price =  $request -> price;
+          $product -> stock = $request -> stock;
+          $product -> category_id = $request -> category_id;
+          $product -> save();
+
+        if ($request -> hasFile('images')){
+    // stock images names in the array to store it in the ddb
+        $images = [];
+
+        // for each loop to iterate throgh images
+            foreach($request ->file('images') as $image){
+                $imageName = time(). '_'. uniqid().'.' . $image -> getClientOriginalExtension();
+                $image -> storeAs('products_images',$imageName,'public');
+                $imageName = 'products_images/'.$imageName;
+                array_push($images,$imageName);
+            }
+            // Delete old images from storage and database
+            foreach($product->images as $image) {
+                // Remove file from storage
+                if (file_exists(storage_path('app/public/' . $image->image_url))) {
+                    unlink(storage_path('app/public/' . $image->image_url));
+                }
+                // Delete record from database
+                $image->delete();
+            }
+            foreach($images as $index => $value){
+                if ($index=== 0){
+                 Product_images::create([
+                     'image_url' => $value,
+                     'product_id' => $product -> id,
+                     'is_primary' => true
+                 ]);
+                } else {
+                 Product_images::create([
+                     'image_url' => $value,
+                     'product_id' => $product -> id,
+                     'is_primary' => false
+                 ]);
+                }
+             }
+        }
+      
+        return response() -> json([
+            "message" => "product has been edited successfullly",
+            "product" => $product
+        ],200);
+    }
+    // delete a product 
+    public function destroy(Product $product){
+        $product -> delete();
+        return response() -> json([
+            "message" => "product has been deleted successfullly"
         ],200);
     }
 }
