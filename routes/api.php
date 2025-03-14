@@ -4,6 +4,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserAuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserManageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middleware\RoleMiddleware;
@@ -27,3 +29,5 @@ Route::middleware(['auth:sanctum','role:product_manager']) -> group(function (){
     // categories controller
     Route::resource('/v1/admin/categories', CategoryController::class);
 });
+// user manager routes
+Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['auth:sanctum','role:user_manager']);

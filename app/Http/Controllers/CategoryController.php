@@ -66,7 +66,35 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        if (auth('sanctum')->user()->can('edit_categories')) {
+            $validate = Validator::make($request->all(), [
+                'name' => 'required|min:4'
+            ]);
+            
+            if ($validate->fails()) {
+                return response()->json(['message' => $validate->errors()], 422);
+            }
+            
+            $category = Category::find($id);
+            
+            if (!$category) {
+                return response()->json(['message' => 'Category not found'], 404);
+            }
+            
+            $category->update([
+                'name' => $request->name,
+                'slug' => Str::slug($request->name)
+            ]);
+            
+            return response()->json([
+                'message' => 'Category updated successfully', 
+                'category' => $category
+            ], 200);
+        }
+        
+        return response()->json([
+            'message' => 'You don\'t have access to update categories'
+        ], 403);
     }
 
     /**
@@ -74,6 +102,20 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (auth('sanctum')->user()->can('delete_categories')) {
+            $category = Category::find($id);
+            
+            if (!$category) {
+                return response()->json(['message' => 'Category not found'], 404);
+            }
+            
+            $category->delete();
+            
+            return response()->json(['message' => 'Category deleted successfully'], 200);
+        }
+        
+        return response()->json([
+            'message' => 'You don\'t have access to delete categories'
+        ], 403);
     }
 }
