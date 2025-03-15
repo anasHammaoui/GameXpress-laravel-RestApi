@@ -14,7 +14,10 @@ class ProductController extends Controller
         // all products
         if (auth('sanctum') -> user() -> can('view_products')){
             $products = Product::all();
-        return response() -> json($products,200);
+        return response() -> json([
+           "products" => $products,
+           "out Of stock" => Product::where('stock',0) -> get()
+        ],200);
         }
         return response() -> json(["message" => "failed to get all products"],403);
     }
@@ -22,9 +25,11 @@ class ProductController extends Controller
     public function show(Product $product){
         if (auth('sanctum')-> user() -> can('view_products')){
 
-            return response() -> json($product) ;
+            return response() -> json([
+                "products" => $product,
+            ], 200);
         }
-        return abort(403);
+        return response() -> json(['message' => 'failed to get data, you\'re not loged in'],403);
     }
     // add a product 
     public function store(Request $request){
