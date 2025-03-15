@@ -16,7 +16,7 @@ class CategoryController extends Controller
        if (auth('sanctum') -> user() -> can('view_categories')){
         $categories = Category::all();
         return response() -> json([
-            'categries' => $categories
+            'categries' => $categories,
         ],200);
        }
        return response() -> json([
