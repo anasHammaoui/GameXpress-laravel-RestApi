@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\UserAuthController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserManageController;
+use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\UserAuthController;
+use App\Http\Controllers\Api\V1\UserManageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middleware\RoleMiddleware;
+// ********************************V1***********************
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -31,3 +31,5 @@ Route::middleware(['auth:sanctum','role:product_manager']) -> group(function (){
 });
 // user manager routes
 Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['auth:sanctum','role:user_manager']);
+
+// *************************************************************V2********************
