@@ -44,7 +44,6 @@ class UserAuthController extends Controller
                 'email' => $request -> email,
                 'password' => Hash::make($request-> password),
             ]);
-            $user -> assignRole('user_manager');
                 return response() -> json([
                     "message" => 'Account created successfully',
                     "role" => "Pending admin",
