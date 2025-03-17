@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\UserAuthController;
 use App\Http\Controllers\Api\V1\UserManageController;
+use App\Http\Controllers\Api\V2\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middleware\RoleMiddleware;
@@ -33,3 +34,7 @@ Route::middleware(['auth:sanctum','role:product_manager']) -> group(function (){
 Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['auth:sanctum','role:user_manager']);
 
 // *************************************************************V2********************
+
+
+// anas
+Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole']) -> middleware(['auth:sanctum','role:super_admin']);
