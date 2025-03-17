@@ -35,4 +35,10 @@ Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['a
 
 // *************************************************************V2********************
 
+<<<<<<< HEAD
 Route::post('/v2/admin/assign-permissions/{user_id}',[AdminController::class,'assignPermissions']) -> middleware(['auth:sanctum','role:super_admin']);
+=======
+
+// anas
+Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole']) -> middleware(['auth:sanctum','role:super_admin']);
+>>>>>>> 6839782e804b8a3963e6293191e39d1a7332a9fb
