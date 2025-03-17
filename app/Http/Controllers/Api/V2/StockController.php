@@ -9,12 +9,11 @@ use Illuminate\Http\Request;
 
 class StockController
 {
-    public function compareToStock($product_id, Request $request)
+    public function compareToStock($product_id, $quantity)
     {
         $product = Product::find($product_id);
         if ($product) {
 
-            $quantity = $request->quantity;
             if ($quantity === null || $quantity <= 0) {
                 return response()->json(['message' => 'ajouter une valeur valide', 'status' => 'error'], 400);
             }
@@ -28,6 +27,8 @@ class StockController
             } else {
                 return response()->json(['message' => 'produit non trouvé dans le panier', 'status' => 'error'], 404);
             }
+        }else{
+            return response()->json(['message' => 'produit non trouvé', 'status' => 'error'], 404);
         }
     }
 }
