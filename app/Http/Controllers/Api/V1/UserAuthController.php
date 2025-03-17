@@ -45,9 +45,10 @@ class UserAuthController extends Controller
                 'email' => $request -> email,
                 'password' => Hash::make($request-> password),
             ]);
+            $user -> assignRole('client');
                 return response() -> json([
                     "message" => 'Account created successfully',
-                    "role" => "Pending admin",
+                    "role" => $user -> roles -> first() -> name,
                 ],200);
            
           }
