@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\UserAuthController;
 use App\Http\Controllers\Api\V1\UserManageController;
 use App\Http\Controllers\Api\V2\StockController;
+use App\Http\Controllers\Api\V2\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middleware\RoleMiddleware;
@@ -37,3 +38,7 @@ Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['a
 
 //route pour la fonction de ceomparation de stock
 Route::get('/v2/admin/stock/{product_id}/{quantity}',[StockController::class,'compareToStock']);
+
+
+// anas
+Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole']) -> middleware(['auth:sanctum','role:super_admin']);
