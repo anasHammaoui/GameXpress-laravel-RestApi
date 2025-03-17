@@ -41,15 +41,9 @@ class PermissionSeeder extends Seeder
         // user manager
         $userManager = Role::create(["name"=>"user_manager"]);
         $userManager -> givePermissionTo(["view_dashboard","view_users","create_users","edit_users","delete_users"]);
-<<<<<<< HEAD
 
         // create client role
         $client = Role::create(["name"=>"client"]);
         $client->givePermissionTo(["view_dashboard", "view_products"]);
-=======
-            // create client role
-    $client = Role::create(["name"=>"client"]);
-    $client->givePermissionTo(["view_dashboard", "view_products"]);
->>>>>>> 6839782e804b8a3963e6293191e39d1a7332a9fb
     }
 }
