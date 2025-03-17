@@ -34,3 +34,6 @@ Route::middleware(['auth:sanctum','role:product_manager']) -> group(function (){
 Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['auth:sanctum','role:user_manager']);
 
 // *************************************************************V2********************
+
+//route pour la fonction de ceomparation de stock
+Route::get('/v2/admin/stock/{product_id}/{quantity}',[StockController::class,'compareToStock']);

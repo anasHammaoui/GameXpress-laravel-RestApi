@@ -11,7 +11,7 @@ class StockController
 {
     public function compareToStock($product_id, $quantity)
     {
-        $product = Product::find($product_id);
+        $product = Product::where('id', $product_id)->first();
         if ($product) {
 
             if ($quantity === null || $quantity <= 0) {
