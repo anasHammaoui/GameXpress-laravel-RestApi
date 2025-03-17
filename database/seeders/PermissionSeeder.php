@@ -18,7 +18,7 @@ class PermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
         // create permissions
-       Permission::create(["name"=>"view_dashboard"]);
+       Permission::create(["name"=>"view_dashboard"]);  
        Permission::create(["name"=>"view_products"]);
        Permission::create(["name"=>"create_products"]);
        Permission::create(["name"=>"edit_products"]);
@@ -41,5 +41,8 @@ class PermissionSeeder extends Seeder
         // user manager
         $userManager = Role::create(["name"=>"user_manager"]);
         $userManager -> givePermissionTo(["view_dashboard","view_users","create_users","edit_users","delete_users"]);
+        // create client role
+        $client = Role::create(["name"=>"client"]);
+        $client->givePermissionTo(["view_dashboard", "view_products"]);
     }
 }
