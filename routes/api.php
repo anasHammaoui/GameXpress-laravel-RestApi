@@ -42,7 +42,7 @@ Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['a
 Route::get('/v2/admin/stock/{product_id}/{quantity}',[StockController::class,'compareToStock']);
 
 //route pour la fonction de fusion de panier
-Route::get('/v2/admin/merge',[StockController::class,'mergeGuest']);
+Route::get('/v2/admin/merge/{sessionId}',[StockController::class,'mergeGuestCart']);
 
 
 // anas
@@ -54,6 +54,6 @@ Route::post('/v2/admin/assign-permissions/{user_id}',[AdminController::class,'as
 
 Route::post('/v2/client/addtocart',[CartController::class,'store']);
 Route::get('/v2/client/cart',[CartController::class,'index']) -> middleware('auth:sanctum', 'role:client');
+
 Route::put('/v2/client/cart/{cart_id}',[CartController::class,'update']);
 Route::delete('/v2/client/cart/{cart_id}',[CartController::class,'destroy']);
-
