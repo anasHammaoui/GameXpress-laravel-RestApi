@@ -17,18 +17,23 @@ class AdminController extends Controller
         $user = User::findOrFail($user_id);
         $permissions = $request->permissions;
 
-        // $validated = Permission::whereIn('name', $permissions)->pluck('name')->toArray();
+        $validatedPermissions  = Permission::whereIn('name', $permissions)->pluck('name')->toArray();
 
-        // if(empty($validated))
-        // {
-        //     return response()->json(['error' => 'Invalid permissions'], 400); // 400 = bad request
-        // }
+        if (count($validatedPermissions) !== count($permissions))
+        {
+            return response()->json(['error' => 'One or more permissions are invalid'], 400); // 400 = bad request
+        }
+
+        if (empty($validatedPermissions))
+        {
+            return response()->json(['error' => 'The permissions array cannot be empty'], 400); // 400 = bad request
+        }
 
         // $user->syncPermissions($validated); 
         // sync for remove all permissions and assign new permissions
         // givePermissionTo for assign new permissions only
-
-        $user->givePermissionTo($permissions);
+        
+        $user->givePermissionTo($validatedPermissions);
 
         return response()->json(['message' => 'Permissions assigned successfully'], 200); // 200 = OK
     }
