@@ -24,11 +24,7 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        if (StockController::compareToStock($request->product_id, $request->quantity)) {
-            return response()->json([
-                'message' => 'Insufficient stock',
-            ], 400);
-        }
+        StockController::compareToStock($request->product_id, $request->quantity);
 
         $sessionId = $request->header('X-Session-ID') ?? Str::uuid()->toString();
 
@@ -87,14 +83,11 @@ class CartController extends Controller
             ], 404);
         }
 
-        if (StockController::compareToStock($request->product_id, $request->quantity)) {
-            return response()->json([
-                'message' => 'Insufficient stock',
-            ], 400);
-        }
+        StockController::compareToStock($request->product_id, $request->quantity);
 
         $cart = Cart::findOrFail($cart_id);
         $cart->quantity = $request->quantity;
+        $cart->price = $cart->product->price * $cart->quantity;
         $cart->save();
         return response()->json([
             'message' => 'Product quantity updated',
