@@ -46,7 +46,7 @@ class StockController
                 if($cartItemUser->quantity > Product::find($cartItemUser->product_id)->stock){
                     return response()->json(['message' => 'stock insuffisant', 'status' => 'error'], 400);
                 }
-                $cartItemUser->price += $cartItemGuest->price;
+                $cartItemUser->price = $cartItemUser->quantity * Product::find($cartItemUser->product_id)->price;
                 $cartItemUser->save();
                 $cartItemGuest->delete();
                 $cartItemGuest->user_id = $user_id;
