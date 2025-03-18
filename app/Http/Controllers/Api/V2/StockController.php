@@ -35,9 +35,9 @@ class StockController
         }
     }
 
-    public function mergeGuestCart($sessionId){
+    public function mergeGuestCart($sessionId, $user_id){
         $cartItemsGuest = Cart::where('session_id', $sessionId)->get();
-        $cartItemsUser = Cart::where('user_id', Auth::id())->get();
+        $cartItemsUser = Cart::where('user_id', $user_id)->get();
         foreach ($cartItemsGuest as $cartItemGuest) {
             //verifier si le produit existe dans le panier de l'utilisateur
             $cartItemUser = $cartItemsUser->where('product_id', $cartItemGuest->product_id)->first();
@@ -49,19 +49,17 @@ class StockController
                 $cartItemUser->price += $cartItemGuest->price;
                 $cartItemUser->save();
                 $cartItemGuest->delete();
-                $cartItemGuest->user_id = Auth::id();
-                dd($cartItemGuest->user_id);
+                $cartItemGuest->user_id = $user_id;
                 $cartItemGuest->session_id = null;
                 $cartItemGuest->save();
-    
+
             } else {
-                $cartItemGuest->user_id = Auth::id();
+                $cartItemGuest->user_id = $user_id;
                 $cartItemGuest->session_id = null;
                 $cartItemGuest->save();
             }
         }
-        return response()->json(['message' => 'panier fusionné avec succès', 'status' => 'success'], 200);  
-       
+        return response()->json(['message' => 'panier fusionné avec succès', 'status' => 'success'], 200);
 
     }
 }   

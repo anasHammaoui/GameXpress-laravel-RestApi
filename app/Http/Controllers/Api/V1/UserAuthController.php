@@ -85,7 +85,7 @@ class UserAuthController extends Controller
         $sessionId = $request->header('X-Session-ID') ?? null;
             if ($sessionId) {
                 $stockController = new StockController();
-                $stockController->mergeGuestCart($sessionId);
+                $stockController->mergeGuestCart($sessionId, $user->id);
             }
         return response()->json([
             "message" => "You loged in successfully",
