@@ -26,12 +26,13 @@ class CartController extends Controller
 
         $sessionId = $request->header('X-Session-ID') ?? Str::uuid()->toString();
 
-        $userId = Auth::id();
+        $userId = auth('sanctum')->user()->id ?? null;
 
         $product = Product::where('id', $request->product_id)->firstOrFail();
         $price = $product->price * $request->quantity;
 
         $cartQuery = Cart::where('product_id', $request->product_id);
+
 
         if ($userId) {
             $cartQuery->where('user_id', $userId);

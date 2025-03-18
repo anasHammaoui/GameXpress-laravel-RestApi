@@ -37,5 +37,5 @@ Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['a
 // *************************************************************V2********************
 Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole']) -> middleware(['auth:sanctum','role:super_admin']);
 
-Route::post('/v2/client/addtocart',[CartController::class,'store']) -> middleware('auth:sanctum', 'role:client');
+Route::post('/v2/client/addtocart',[CartController::class,'store']);
 Route::get('/v2/client/cart',[CartController::class,'index']) -> middleware('auth:sanctum', 'role:client');
