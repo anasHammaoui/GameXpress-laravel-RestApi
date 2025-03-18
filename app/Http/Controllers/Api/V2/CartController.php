@@ -24,11 +24,7 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        if (StockController::compareToStock($request->product_id, $request->quantity)) {
-            return response()->json([
-                'message' => 'Insufficient stock',
-            ], 400);
-        }
+        StockController::compareToStock($request->product_id, $request->quantity);
 
         $sessionId = $request->header('X-Session-ID') ?? Str::uuid()->toString();
 
@@ -87,14 +83,11 @@ class CartController extends Controller
             ], 404);
         }
 
-        if (StockController::compareToStock($request->product_id, $request->quantity)) {
-            return response()->json([
-                'message' => 'Insufficient stock',
-            ], 400);
-        }
+       StockController::compareToStock($request->product_id, $request->quantity) ;
 
         $cart = Cart::findOrFail($cart_id);
         $cart->quantity = $request->quantity;
+        $cart->price = $cart->product->price * $cart->quantity;
         $cart->save();
         return response()->json([
             'message' => 'Product quantity updated',
@@ -109,5 +102,28 @@ class CartController extends Controller
         return response()->json([
             'message' => 'Product removed from cart',
         ]);
+    }
+    // calcul de total panier
+    public function cartDetails($userId){
+        $userCarts = Cart::where("user_id",$userId) -> get();
+        $products = [];
+        foreach($userCarts as $cart){
+           array_push($products,[
+            "product" => $cart -> product -> name,
+            "product_id" => $cart -> product_id,
+            "quantity" => $cart -> quantity,
+            "details" => [
+                "TVA" => "6%",
+                "livraison" => "5$",
+                "Original_Price" => $cart -> price,
+                "total_fees" => $fees = (($cart -> price )- ($cart -> price * 0.6)) - 5,
+                "After_fees_price" => $cart -> price + $fees,
+            ],
+           ]);
+        }
+        if (count($userCarts) > 0){
+            return response() -> json(["products" => $products],200);
+        } 
+        return   response() -> json(["message" => "empty cart"],422);
     }
 }
