@@ -47,7 +47,6 @@ Route::get('/v2/admin/merge',[StockController::class,'mergeGuest']);
 
 // anas
 Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole']) -> middleware(['auth:sanctum','role:super_admin']);
-=======
 // mohammed
 Route::post('/v2/admin/assign-permissions/{user_id}',[AdminController::class,'assignPermissions']) -> middleware(['auth:sanctum','role:super_admin']);
 
