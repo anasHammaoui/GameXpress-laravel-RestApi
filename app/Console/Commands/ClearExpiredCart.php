@@ -30,7 +30,14 @@ class ClearExpiredCart extends Command
         $expirationTime = Carbon::now()->subHours(48);
         
         $deleted = Cart::where('created_at', '<', $expirationTime)->delete();
-        $this->info("$deleted items removed from cart.");
+        if ($deleted > 0) 
+        {
+            $this->info("$deleted items removed from cart.");
+        }
+        else 
+        {
+            $this->info("No items to remove from cart.");
+        }
     }
 }
 
