@@ -83,7 +83,7 @@ class CartController extends Controller
             ], 404);
         }
 
-       StockController::compareToStock($request->product_id, $request->quantity) ;
+        StockController::compareToStock($request->product_id, $request->quantity);
 
         $cart = Cart::findOrFail($cart_id);
         $cart->quantity = $request->quantity;
