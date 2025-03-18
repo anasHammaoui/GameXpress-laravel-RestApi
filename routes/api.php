@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\UserAuthController;
 use App\Http\Controllers\Api\V1\UserManageController;
+use App\Http\Controllers\Api\V2\StockController;
 use App\Http\Controllers\Api\V2\CartController;
 use App\Http\Controllers\Api\V2\AdminController;
 use Illuminate\Http\Request;
@@ -36,6 +37,17 @@ Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['a
 
 // *************************************************************V2********************
 
+
+//route pour la fonction de ceomparation de stock
+Route::get('/v2/admin/stock/{product_id}/{quantity}',[StockController::class,'compareToStock']);
+
+//route pour la fonction de fusion de panier
+Route::get('/v2/admin/merge',[StockController::class,'mergeGuest']);
+
+
+// anas
+Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole']) -> middleware(['auth:sanctum','role:super_admin']);
+=======
 // mohammed
 Route::post('/v2/admin/assign-permissions/{user_id}',[AdminController::class,'assignPermissions']) -> middleware(['auth:sanctum','role:super_admin']);
 

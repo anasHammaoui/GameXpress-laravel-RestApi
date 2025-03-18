@@ -11,7 +11,6 @@ use Spatie\Permission\Models\Permission;
 class AdminController extends Controller
 {
     // Permissions management
-
     public function assignPermissions(Request $request, $user_id)
     {
         $user = User::findOrFail($user_id);
@@ -39,7 +38,6 @@ class AdminController extends Controller
     }
 
     // Roles management
-
 
     public function changeRole(User $user, Request $request){
         if (auth('sanctum') -> user() -> roles -> first() -> name === 'super_admin'){
