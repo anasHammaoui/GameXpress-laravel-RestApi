@@ -107,7 +107,9 @@ class CartController extends Controller
     public function cartDetails($userId){
         $userCarts = Cart::where("user_id",$userId) -> get();
         $products = [];
+        $totalPrice = 0;
         foreach($userCarts as $cart){
+            $fees = (($cart -> price )- ($cart -> price * 0.6)) - 5;
            array_push($products,[
             "product" => $cart -> product -> name,
             "product_id" => $cart -> product_id,
@@ -116,13 +118,14 @@ class CartController extends Controller
                 "TVA" => "6%",
                 "livraison" => "5$",
                 "Original_Price" => $cart -> price,
-                "total_fees" => $fees = (($cart -> price )- ($cart -> price * 0.6)) - 5,
+                "total_fees" => $fees,
                 "After_fees_price" => $cart -> price + $fees,
             ],
            ]);
+            $totalPrice +=  $cart -> price + $fees;
         }
         if (count($userCarts) > 0){
-            return response() -> json(["products" => $products],200);
+            return response() -> json(["products" => $products, "totalPrice" => $totalPrice],200);
         } 
         return   response() -> json(["message" => "empty cart"],422);
     }
