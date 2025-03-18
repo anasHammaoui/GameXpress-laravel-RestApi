@@ -55,4 +55,6 @@ Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole'])
 
 Route::post('/v2/client/addtocart',[CartController::class,'store']);
 Route::get('/v2/client/cart',[CartController::class,'index']) -> middleware('auth:sanctum', 'role:client');
+Route::put('/v2/client/cart/{cart_id}',[CartController::class,'update']);
+Route::delete('/v2/client/cart/{cart_id}',[CartController::class,'destroy']);
 

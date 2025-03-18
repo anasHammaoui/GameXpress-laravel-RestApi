@@ -24,6 +24,12 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
+        if (StockController::compareToStock($request->product_id, $request->quantity)) {
+            return response()->json([
+                'message' => 'Insufficient stock',
+            ], 400);
+        }
+
         $sessionId = $request->header('X-Session-ID') ?? Str::uuid()->toString();
 
         $userId = auth('sanctum')->user()->id ?? null;
@@ -60,6 +66,48 @@ class CartController extends Controller
             'message' => 'Product added to cart',
             'cart' => $cartItem,
             'session_id' => $sessionId,
+        ]);
+    }
+
+    public function show($cart_id)
+    {
+        $cart = Cart::findOrFail($cart_id);
+        return response()->json($cart);
+    }
+
+    public function update(Request $request, $cart_id)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        if (!Cart::where('id', $cart_id)->exists()) {
+            return response()->json([
+                'message' => 'Product not found in cart',
+            ], 404);
+        }
+
+        if (StockController::compareToStock($request->product_id, $request->quantity)) {
+            return response()->json([
+                'message' => 'Insufficient stock',
+            ], 400);
+        }
+
+        $cart = Cart::findOrFail($cart_id);
+        $cart->quantity = $request->quantity;
+        $cart->save();
+        return response()->json([
+            'message' => 'Product quantity updated',
+            'cart' => $cart,
+        ]);
+    }
+
+    public function destroy($cart_id)
+    {
+        $cart = Cart::findOrFail($cart_id);
+        $cart->delete();
+        return response()->json([
+            'message' => 'Product removed from cart',
         ]);
     }
 }
