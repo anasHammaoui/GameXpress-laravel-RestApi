@@ -103,4 +103,27 @@ class CartController extends Controller
             'message' => 'Product removed from cart',
         ]);
     }
+    // calcul de total panier
+    public function cartDetails($userId){
+        $userCarts = Cart::where("user_id",$userId) -> get();
+        $products = [];
+        foreach($userCarts as $cart){
+           array_push($products,[
+            "product" => $cart -> product -> name,
+            "product_id" => $cart -> product_id,
+            "quantity" => $cart -> quantity,
+            "details" => [
+                "TVA" => "6%",
+                "livraison" => "5$",
+                "Original_Price" => $cart -> price,
+                "total_fees" => $fees = (($cart -> price )- ($cart -> price * 0.6)) - 5,
+                "After_fees_price" => $cart -> price + $fees,
+            ],
+           ]);
+        }
+        if (count($userCarts) > 0){
+            return response() -> json(["products" => $products],200);
+        } 
+        return   response() -> json(["message" => "empty cart"],422);
+    }
 }
