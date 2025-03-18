@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\UserAuthController;
 use App\Http\Controllers\Api\V1\UserManageController;
+use App\Http\Controllers\Api\V2\CartController;
 use App\Http\Controllers\Api\V2\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,9 +35,7 @@ Route::middleware(['auth:sanctum','role:product_manager']) -> group(function (){
 Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['auth:sanctum','role:user_manager']);
 
 // *************************************************************V2********************
-
 Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole']) -> middleware(['auth:sanctum','role:super_admin']);
 
-Route::post('/v2/client/addtocart{id}',[CartController::class,'store']) -> middleware('auth:sanctum', 'role:client');
+Route::post('/v2/client/addtocart',[CartController::class,'store']) -> middleware('auth:sanctum', 'role:client');
 Route::get('/v2/client/cart',[CartController::class,'index']) -> middleware('auth:sanctum', 'role:client');
-

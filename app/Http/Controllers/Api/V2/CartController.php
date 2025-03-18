@@ -1,47 +1,63 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Product;
-use App\Models\Product_images;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+
 class CartController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         $cart = auth()->user()->carts;
         return response()->json($cart);
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
         ]);
 
         $sessionId = $request->header('X-Session-ID') ?? Str::uuid()->toString();
-    
-        $cart = new Cart();
-        
-        if (Auth::check()) {
-            $cart->user_id = Auth::id();
+
+        $userId = Auth::id();
+
+        $product = Product::where('id', $request->product_id)->firstOrFail();
+        $price = $product->price * $request->quantity;
+
+        $cartQuery = Cart::where('product_id', $request->product_id);
+
+        if ($userId) {
+            $cartQuery->where('user_id', $userId);
         } else {
-            $cart->session_id = $sessionId;
+            $cartQuery->where('session_id', $sessionId);
         }
-        
-        $cart->product_id = $request->product_id;
-        $cart->quantity = $request->quantity;
-        $cart->price = $request->price;
-        $cart->save();
-    
+
+        $cartItem = $cartQuery->first();
+
+        if ($cartItem) {
+            $cartItem->quantity += $request->quantity;
+            $cartItem->price += $price;
+            $cartItem->save();
+        } else {
+            $cartItem = new Cart();
+            $cartItem->user_id = $userId;
+            $cartItem->session_id = $userId ? null : $sessionId;
+            $cartItem->product_id = $request->product_id;
+            $cartItem->quantity = $request->quantity;
+            $cartItem->price = $price;
+            $cartItem->save();
+        }
+
         return response()->json([
             'message' => 'Product added to cart',
-            'cart' => $cart,
+            'cart' => $cartItem,
             'session_id' => $sessionId,
         ]);
     }
