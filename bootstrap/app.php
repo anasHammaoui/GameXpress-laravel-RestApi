@@ -21,6 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    }) -> withSchedule(function (Schedule $schedule){
+    })
+    ->withCommands([
+        \App\Console\Commands\ClearExpiredCart::class,
+    ])
+    -> withSchedule(function (Schedule $schedule){
             $schedule -> command('email:empty-stock-notification') -> everyMinute();
+            $schedule -> command('app:clear-expired-cart') -> hourly();
     }) ->create();

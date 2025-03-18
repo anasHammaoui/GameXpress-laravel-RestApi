@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class StockController
 {
-    public function compareToStock($product_id, $quantity)
+    public static function compareToStock($product_id, $quantity)
     
     {
         $product = Product::where('id', $product_id)->first();
