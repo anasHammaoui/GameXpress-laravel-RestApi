@@ -6,10 +6,13 @@ use App\Models\Cart;
 use App\Models\Product;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 
 class StockController
 {
     public function compareToStock($product_id, $quantity)
+    
     {
         $product = Product::where('id', $product_id)->first();
         if ($product) {
@@ -27,7 +30,7 @@ class StockController
             } else {
                 return response()->json(['message' => 'produit non trouvé dans le panier', 'status' => 'error'], 404);
             }
-        }else{
+        } else {
             return response()->json(['message' => 'produit non trouvé', 'status' => 'error'], 404);
         }
     }

@@ -39,6 +39,9 @@ Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['a
 //route pour la fonction de ceomparation de stock
 Route::get('/v2/admin/stock/{product_id}/{quantity}',[StockController::class,'compareToStock']);
 
+//route pour la fonction de fusion de panier
+Route::get('/v2/admin/merge',[StockController::class,'mergeGuest']);
+
 
 // anas
 Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole']) -> middleware(['auth:sanctum','role:super_admin']);
