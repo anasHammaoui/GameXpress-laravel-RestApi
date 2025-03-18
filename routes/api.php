@@ -35,7 +35,13 @@ Route::middleware(['auth:sanctum','role:product_manager']) -> group(function (){
 Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['auth:sanctum','role:user_manager']);
 
 // *************************************************************V2********************
+
+// mohammed
+Route::post('/v2/admin/assign-permissions/{user_id}',[AdminController::class,'assignPermissions']) -> middleware(['auth:sanctum','role:super_admin']);
+
+// anas
 Route::post('v2/admin/users/roles/{user}',[AdminController::class,'changeRole']) -> middleware(['auth:sanctum','role:super_admin']);
 
 Route::post('/v2/client/addtocart',[CartController::class,'store']);
 Route::get('/v2/client/cart',[CartController::class,'index']) -> middleware('auth:sanctum', 'role:client');
+
