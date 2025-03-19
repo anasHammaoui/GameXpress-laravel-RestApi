@@ -33,20 +33,24 @@ class CommandController extends Controller
 
         if (isset($data['totalPrice'])) {
             $totalPrice = $data['totalPrice'];
-        } else {
+        } else { 
             $totalPrice = 0;
         }
         $order = Orders::create([
             'user_id' => $user_id,
-            'totalPrice' => $totalPrice,
-            'status' => 'pending',
+            'total_price' => $totalPrice,
+            'status' => 'en attente',
         ]);
+        $order->save();
         if($order){
-            $cartController = new CartController;
-            $cart = $cartController->index();
-
+            $cartsJson = $Controller->index();
+            $carts = json_decode($cartsJson->getContent(), true);
+            foreach ($carts as $cart) {
+                $Controller->destroy($cart['id']);
+            }   
             return response()->json(['message' => 'Order created successfully', 'data' => $order]);
         }
+        return response()->json(['message' => 'Order not created']);
     }
 
     /**
