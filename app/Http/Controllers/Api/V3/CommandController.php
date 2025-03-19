@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V3;
 
 use App\Http\Controllers\Api\V2\CartController;
 use App\Http\Controllers\Controller;
+use App\Models\Orders;
 use Illuminate\Http\Request;
 
 class CommandController extends Controller
