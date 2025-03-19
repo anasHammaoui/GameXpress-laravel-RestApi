@@ -67,6 +67,7 @@ Route::delete('/v2/client/cart/{cart_id}',[CartController::class,'destroy']);
 // Orders
 
 Route::post('/v3/client/order',[CommandController::class,'create']) -> middleware(['auth:sanctum','role:client']);
-Route::get('/v3/admin/orders',[CommandController::class,'index']) -> middleware('auth:sanctum', 'role:admin');
-Route::post('/v3/admin/orders/{id}',[CommandController::class,'show']) -> middleware('auth:sanctum', 'role:admin');
-
+Route::get('/v3/admin/orders',[CommandController::class,'index']) -> middleware('auth:sanctum', 'role:super_admin');
+Route::get('/v3/admin/orders/{id}',[CommandController::class,'show']) -> middleware('auth:sanctum', 'role:super_admin');
+Route::put('/v3/admin/orders/{id}/status',[CommandController::class,'update']) -> middleware('auth:sanctum', 'role:super_admin');
+Route::delete('/v3/admin/orders/{id}',[CommandController::class,'destroy']) -> middleware('auth:sanctum', 'role:super_admin');
