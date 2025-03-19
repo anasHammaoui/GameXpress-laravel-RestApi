@@ -4,10 +4,21 @@ namespace App\Http\Controllers\Api\V3;
 
 use App\Http\Controllers\Api\V2\CartController;
 use App\Http\Controllers\Controller;
+use App\Models\Orders;
 use Illuminate\Http\Request;
 
 class CommandController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
+
+     // list all commands
+    public function index()
+    {
+       $order = Orders::all();
+       return response()->json($order);
+    }
 
     /**
      * Show the form for creating a new resource.
