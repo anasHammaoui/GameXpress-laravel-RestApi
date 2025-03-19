@@ -9,6 +9,16 @@ use Illuminate\Http\Request;
 
 class CommandController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
+
+     // list all commands
+    public function index()
+    {
+       $order = Orders::all();
+       return response()->json($order);
+    }
 
     /**
      * Show the form for creating a new resource.
