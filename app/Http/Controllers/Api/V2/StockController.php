@@ -18,20 +18,20 @@ class StockController
         if ($product) {
 
             if ($quantity === null || $quantity <= 0) {
-                return response()->json(['message' => 'ajouter une valeur valide', 'status' => 'error'], 400);
+                return false;
             }
             $cart = Cart::where('product_id', $product_id)->first();
             if ($cart) {
                 if ($quantity > $product->stock) {
-                    return response()->json(['message' => 'stock insuffisant', 'status' => 'error'], 400);
+                    return false;
                 } else {
-                    return response()->json(['message' => 'stock suffisant', 'status' => 'success'], 200);
+                    return true;
                 }
             } else {
-                return response()->json(['message' => 'produit non trouvé dans le panier', 'status' => 'error'], 404);
+                return false;
             }
         } else {
-            return response()->json(['message' => 'produit non trouvé', 'status' => 'error'], 404);
+            return false;
         }
     }
 

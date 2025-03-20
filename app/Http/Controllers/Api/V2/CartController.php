@@ -24,7 +24,13 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        StockController::compareToStock($request->product_id, $request->quantity);
+        $quantityValidation = StockController::compareToStock($request->product_id, $request->quantity);
+
+        if (!$quantityValidation) {
+            return response()->json([
+                'message' => 'Stock insuffisant',
+            ], 400);    
+        }
 
         $sessionId = $request->header('X-Session-ID') ?? Str::uuid()->toString();
 

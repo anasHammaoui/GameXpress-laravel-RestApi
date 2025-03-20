@@ -30,6 +30,10 @@ class CommandController extends Controller
 
         $response = $Controller->cartDetails($user_id); 
         $data = json_decode($response->getContent(), true);
+        
+        if (isset($data['message'])) {
+            return response()->json(['message' => $data['message']]);
+        }
 
         if (isset($data['totalPrice'])) {
             $totalPrice = $data['totalPrice'];
