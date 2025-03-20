@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\UserManageController;
 use App\Http\Controllers\Api\V2\StockController;
 use App\Http\Controllers\Api\V2\CartController;
 use App\Http\Controllers\Api\V2\AdminController;
+use App\Http\Controllers\Api\V3\PaymentController;
 use App\Http\Controllers\Api\V3\CommandController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -63,7 +64,10 @@ Route::delete('/v2/client/cart/{cart_id}',[CartController::class,'destroy']);
 
 
 // ******************   V3  ******************
-
+// payment
+    Route::post("/v3/client/cart/payment",[PaymentController::class, "createCheckoutSession"]);
+    Route::get('/v3/client/payment/success', [PaymentController::class, 'success']);
+    Route::get('/v3/client/payment/cancel',[PaymentController::class, 'cancel']);
 // Orders
 
 Route::post('/v3/client/order',[CommandController::class,'create']) -> middleware(['auth:sanctum','role:client']);
@@ -71,3 +75,6 @@ Route::get('/v3/admin/orders',[CommandController::class,'index']) -> middleware(
 Route::get('/v3/admin/orders/{id}',[CommandController::class,'show']) -> middleware('auth:sanctum', 'role:super_admin');
 Route::put('/v3/admin/orders/{id}/status',[CommandController::class,'update']) -> middleware('auth:sanctum', 'role:super_admin');
 Route::delete('/v3/admin/orders/{id}',[CommandController::class,'destroy']) -> middleware('auth:sanctum', 'role:super_admin');
+
+//transations
+Route::get('/v3/admin/transactions', [PaymentController::class, 'transactions'])->middleware(['auth:sanctum','role:super_admin']);

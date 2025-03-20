@@ -13,7 +13,7 @@ class CartController extends Controller
 {
     public function index()
     {
-        $cart = auth()->user()->carts;
+        $cart = auth("sanctum")->user()->carts;
         return response()->json($cart);
     }
 
