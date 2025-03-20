@@ -46,6 +46,11 @@ class CommandController extends Controller
             $cartsJson = $Controller->index();
             $carts = json_decode($cartsJson->getContent(), true);
             foreach ($carts as $cart) {
+                $order->items()->create([
+                    'product_id' => $cart['product_id'],
+                    'quantity' => $cart['quantity'],
+                    'price' => $cart['price'],
+                ]);
                 $Controller->destroy($cart['id']);
             }   
             return response()->json(['message' => 'Order created successfully', 'data' => $order]);
