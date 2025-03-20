@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\OrderItems;
 use App\Models\Orders;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
 use Stripe\Climate\Order;
@@ -34,6 +35,7 @@ class PaymentController extends Controller
         $orderData = json_decode($orderResponse->getContent(), true)['data'];
         $order = Orders::find($orderData["id"])->with("items")->first();
         $priceData = [];
+        $products = [];
         foreach ($order->items as $item) {
             $priceData[] = [
                 'price_data' => [
@@ -45,6 +47,10 @@ class PaymentController extends Controller
                 ],
                 'quantity' => $item->quantity,
             ];
+            $products[] = [
+                'product_id' => $item->product->id,
+                'quantity' => $item->quantity,
+            ];
         }
         if ($orderData["total_price"] > 0) {
             Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -54,6 +60,10 @@ class PaymentController extends Controller
                 'mode' => 'payment',
                 'success_url' => env('APP_URL') . '/api/v3/client/payment/success?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => env('APP_URL') . '/api/v3/client/payment/cancel',
+                'metadata'=>  [
+                    'order_id' => $orderData["id"],
+                    'products' => json_encode($products)
+                ]
             ]);
 
             return response()->json(['id' => $session->url]);
@@ -75,13 +85,15 @@ class PaymentController extends Controller
         try {
             Stripe::setApiKey(env('STRIPE_SECRET'));
             $session = Session::retrieve($sessionId);
-            // dd($session);
+            $products = json_decode($session->metadata->products, true);
+            foreach ($products as $product) {
+                $this->handleStock($product['product_id'], $product['quantity']);
+            }
             if ($session->payment_status !== 'paid') {
                 return response()->json(['message' => 'Le paiement n\'est pas encore complété'], 402);
             }
 
             $paymentIntent = PaymentIntent::retrieve($session->payment_intent);
-
             return response()->json([
                 'transaction_id' => $paymentIntent->id,
                 'amount' => $paymentIntent->amount_received / 100,
@@ -93,6 +105,16 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erreur : ' . $e->getMessage()], 500);
         }
+    }
+    public function handleStock($productId,$quantity){
+        if ($productId){
+            $product = Product::find($productId);
+            if ($product) {
+                $product->stock = $product->stock - $quantity;
+                $product->save();
+            }
+        }
+        return;
     }
 
     public function transactions()
