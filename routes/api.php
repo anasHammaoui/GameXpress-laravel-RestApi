@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\UserManageController;
 use App\Http\Controllers\Api\V2\StockController;
 use App\Http\Controllers\Api\V2\CartController;
 use App\Http\Controllers\Api\V2\AdminController;
+use App\Http\Controllers\Api\V3\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middleware\RoleMiddleware;
@@ -59,3 +60,10 @@ Route::get('/v2/client/cart',[CartController::class,'index']) -> middleware('aut
 
 Route::put('/v2/client/cart/{cart_id}',[CartController::class,'update']);
 Route::delete('/v2/client/cart/{cart_id}',[CartController::class,'destroy']);
+
+// payment
+Route::post("/v3/client/cart/payment",[PaymentController::class, "createCheckoutSession"]);
+
+Route::get('/v3/client/payment/success', [PaymentController::class, 'success']);
+
+Route::get('/v3/client/payment/cancel',[PaymentController::class, 'cancel']);
