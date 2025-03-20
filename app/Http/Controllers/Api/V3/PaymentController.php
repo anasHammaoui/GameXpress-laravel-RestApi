@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\V3;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
+use App\Models\OrderItems;
+use App\Models\Orders;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
+use Stripe\Climate\Order;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 
@@ -28,32 +31,33 @@ class PaymentController extends Controller
         $orderController = new CommandController();
         $orderResponse = $orderController->create();
         $orderData = json_decode($orderResponse->getContent(), true)['data'];
-        // dd($orderData);
-        // dd($order);
-        if ($orderData["total_price"] === 0){
+        $order = Orders::find($orderData["id"])->with("items")->first();
+        $priceData = [];
+        foreach ($order->items as $item) {
+            $priceData[] = [
+                'price_data' => [
+                    'currency' => 'usd',
+                    'product_data' => [
+                        'name' => $item->product->name,
+                    ],
+                    'unit_amount' => $item->price * 100,
+                ],
+                'quantity' => $item->quantity,
+            ];
+        }
+        if ($orderData["total_price"] > 0) {
             Stripe::setApiKey(env('STRIPE_SECRET'));
-            $orderItems = OrderIte::find($orderData["id"]) -> first();
             $session = Session::create([
                 'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'usd',
-                        'product_data' => [
-                            'name' => ,
-                        ],
-                        'unit_amount' => $orderData["total_price"] * 100,
-                    ],
-                    'quantity' => 1,
-                ]],
+                'line_items' => $priceData,
                 'mode' => 'payment',
                 'success_url' => env('APP_URL') . '/api/v3/client/payment/success?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => env('APP_URL') . '/api/v3/client/payment/cancel',
-
             ]);
             
             return response()->json(['id' => $session->url]);
         } 
-        return (response()  -> json(["message"=>"You have no orders"]));
+        return response()->json(["message" => "You have no orders"]);
     }
     public function cancel(){
         return response() -> json(["message"=> "order canceled"],422);
