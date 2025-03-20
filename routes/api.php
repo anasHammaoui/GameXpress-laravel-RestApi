@@ -75,3 +75,6 @@ Route::get('/v3/admin/orders',[CommandController::class,'index']) -> middleware(
 Route::get('/v3/admin/orders/{id}',[CommandController::class,'show']) -> middleware('auth:sanctum', 'role:super_admin');
 Route::put('/v3/admin/orders/{id}/status',[CommandController::class,'update']) -> middleware('auth:sanctum', 'role:super_admin');
 Route::delete('/v3/admin/orders/{id}',[CommandController::class,'destroy']) -> middleware('auth:sanctum', 'role:super_admin');
+
+//transations
+Route::get('/v3/admin/transactions', [PaymentController::class, 'transactions'])->middleware(['auth:sanctum','role:super_admin']);
