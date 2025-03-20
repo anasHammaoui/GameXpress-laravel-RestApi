@@ -23,38 +23,37 @@ class PaymentController extends Controller
     }
     
     
-    public function createCheckoutSession(Request $request)
+    public function createCheckoutSession()
     {
-        // Validate request
-        $request->validate([
-            'product_id' => 'required',
-            'price' => 'required|numeric',
-            'name' => 'required|string',
-        ]);
-        
-        Stripe::setApiKey(env('STRIPE_SECRET'));
-        
-        $session = Session::create([
-            'payment_method_types' => ['card'],
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => 'usd',
-                    'product_data' => [
-                        'name' => $request->name,
+        $orderController = new CommandController();
+        $orderResponse = $orderController->create();
+        $orderData = json_decode($orderResponse->getContent(), true)['data'];
+        // dd($orderData);
+        // dd($order);
+        if ($orderData["total_price"] === 0){
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+            $orderItems = OrderIte::find($orderData["id"]) -> first();
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => ,
+                        ],
+                        'unit_amount' => $orderData["total_price"] * 100,
                     ],
-                    'unit_amount' => $request->price * 100,
-                ],
-                'quantity' => 1,
-            ]],
-            'mode' => 'payment',
-            'success_url' => env('APP_URL') . '/api/v3/client/payment/success?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => env('APP_URL') . '/api/v3/client/payment/cancel',
-            'metadata' => [
-                'product_id' => $request->product_id,
-            ],
-        ]);
-        
-        return response()->json(['id' => $session->url]);
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => env('APP_URL') . '/api/v3/client/payment/success?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => env('APP_URL') . '/api/v3/client/payment/cancel',
+
+            ]);
+            
+            return response()->json(['id' => $session->url]);
+        } 
+        return (response()  -> json(["message"=>"You have no orders"]));
     }
     public function cancel(){
         return response() -> json(["message"=> "order canceled"],422);
@@ -70,24 +69,23 @@ class PaymentController extends Controller
         try {
             Stripe::setApiKey(env('STRIPE_SECRET'));
             $session = Session::retrieve($sessionId);
-            
-            // Check if payment was successful
-            if ($session->payment_status === 'paid') {
-                // Extract metadata
-                $productId = $session->metadata->product_id;
-                
-                // Here you could update your database to mark the order as paid
-                // Example: Order::where('product_id', $productId)->update(['payment_status' => 'paid']);
-                
-                return response()->json([
-                    'message' => 'Payment successful',
-                    'product_id' => $productId
-                ], 200);
-            } else {
-                return response()->json(['message' => 'Payment not completed'], 402);
+            // dd($session);
+            if ($session->payment_status !== 'paid') {
+                return response()->json(['message' => 'Le paiement n\'est pas encore complété'], 402);
             }
+    
+            $paymentIntent = PaymentIntent::retrieve($session->payment_intent);
+    
+            return response()->json([
+                'transaction_id' => $paymentIntent->id,
+                'amount' => $paymentIntent->amount_received / 100,
+                'currency' => strtoupper($paymentIntent->currency),
+                'status' => $paymentIntent->status,
+                'payment_method' => $paymentIntent->payment_method_types[0] ?? 'N/A',
+                'created_at' => date('Y-m-d H:i:s', $paymentIntent->created),
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error processing payment: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Erreur : ' . $e->getMessage()], 500);
         }
     }
 }
