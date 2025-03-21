@@ -7,6 +7,8 @@ use App\Models\Cart;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\Product;
+use App\Models\User;
+use App\Notifications\PaymentSuccessfulNotification;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
 use Stripe\Climate\Order;
@@ -94,6 +96,14 @@ class PaymentController extends Controller
             }
 
             $paymentIntent = PaymentIntent::retrieve($session->payment_intent);
+
+            $user = User::find($session->metadata->user_id);
+            
+            if ($user) 
+            {
+                $user->notify(new PaymentSuccessfulNotification($paymentIntent, $products));
+            }
+
             return response()->json([
                 'transaction_id' => $paymentIntent->id,
                 'amount' => $paymentIntent->amount_received / 100,
