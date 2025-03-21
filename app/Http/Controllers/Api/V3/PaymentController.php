@@ -13,21 +13,48 @@ use Stripe\Climate\Order;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Exception;
-
+/**
+ * @OA\Info(
+ *      title="GameExpress Ecommerce platform",
+ *      version="3",
+ *      description="Api documentation for GameExpress platform"
+ * )
+ *
+ * @OA\Server(
+ *      url="http://127.0.0.1:8000/api",
+ *      description="Local development server"
+ * )
+ */
 class PaymentController extends Controller
 {
-    public function index($id)
-    {
-        $cart = Cart::find($id)->first();
-        if ($cart) {
-            return view('checkout', ["product_id" => $cart->product_id, "quantity" => $cart->quantity, "price" => $cart->price]);
-        }
-        return response()->json([
-            "message" => "product not found",
-        ]);
-    }
-
-
+      /**
+     * @OA\Post(
+     *     path="/api/v3/client/cart/payment",
+     *     summary="Create a Stripe Checkout Session",
+     *     description="Generates a Stripe checkout session for an order and returns the session URL.",
+     *     operationId="createCheckoutSession",
+     *     tags={"Payment"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Checkout session created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="string", example="https://checkout.stripe.com/pay/cs_test_abc123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="No orders available",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You have no orders")
+     *         )
+     *     ),
+     *     @OA\SecurityScheme(
+     *         securityScheme="BearerToken",
+     *         type="http",
+     *         scheme="bearer"
+     *     )
+     * )
+     */
     public function createCheckoutSession()
     {
         $orderController = new CommandController();
@@ -75,6 +102,60 @@ class PaymentController extends Controller
         
         return response()->json(["message" => "order canceled"], 422);
     }
+      /**
+     * @OA\Get(
+     *     path="/api/v3/client/payment/success",
+     *     summary="Handle successful Stripe payment",
+     *     description="Retrieves payment details using the session ID and updates stock.",
+     *     operationId="successPayment",
+     *     tags={"Payment"},
+     *     @OA\Parameter(
+     *         name="session_id",
+     *         in="query",
+     *         required=true,
+     *         description="The Stripe checkout session ID",
+     *         @OA\Schema(type="string", example="cs_test_abc123")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Payment details retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="transaction_id", type="string", example="pi_3Jabc123"),
+     *             @OA\Property(property="amount", type="number", example=29.99),
+     *             @OA\Property(property="currency", type="string", example="USD"),
+     *             @OA\Property(property="status", type="string", example="succeeded"),
+     *             @OA\Property(property="payment_method", type="string", example="card"),
+     *             @OA\Property(property="created_at", type="string", example="2025-03-21 15:30:00")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="No session ID provided",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No session ID provided")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=402,
+     *         description="Payment not completed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Le paiement n'est pas encore complété")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Stripe API error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Erreur : API Stripe indisponible")
+     *         )
+     *     ),
+     *     @OA\SecurityScheme(
+     *         securityScheme="BearerToken",
+     *         type="http",
+     *         scheme="bearer"
+     *     )
+     * )
+     */
     public function success(Request $request)
     {
         if (!$request->has('session_id')) {

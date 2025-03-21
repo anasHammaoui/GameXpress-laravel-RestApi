@@ -1,0 +1,174 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "GameExpress Ecommerce platform",
+        "description": "Api documentation for GameExpress platform",
+        "version": "3"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000/api",
+            "description": "Local development server"
+        }
+    ],
+    "paths": {
+        "/api/v3/client/cart/payment": {
+            "post": {
+                "tags": [
+                    "Payment"
+                ],
+                "summary": "Create a Stripe Checkout Session",
+                "description": "Generates a Stripe checkout session for an order and returns the session URL.",
+                "operationId": "createCheckoutSession",
+                "responses": {
+                    "200": {
+                        "description": "Checkout session created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "example": "https://checkout.stripe.com/pay/cs_test_abc123"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "No orders available",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You have no orders"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v3/client/payment/success": {
+            "get": {
+                "tags": [
+                    "Payment"
+                ],
+                "summary": "Handle successful Stripe payment",
+                "description": "Retrieves payment details using the session ID and updates stock.",
+                "operationId": "successPayment",
+                "parameters": [
+                    {
+                        "name": "session_id",
+                        "in": "query",
+                        "description": "The Stripe checkout session ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "cs_test_abc123"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "transaction_id": {
+                                            "type": "string",
+                                            "example": "pi_3Jabc123"
+                                        },
+                                        "amount": {
+                                            "type": "number",
+                                            "example": 29.99
+                                        },
+                                        "currency": {
+                                            "type": "string",
+                                            "example": "USD"
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "succeeded"
+                                        },
+                                        "payment_method": {
+                                            "type": "string",
+                                            "example": "card"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "example": "2025-03-21 15:30:00"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "No session ID provided",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No session ID provided"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "402": {
+                        "description": "Payment not completed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Le paiement n'est pas encore complété"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Stripe API error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur : API Stripe indisponible"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Payment",
+            "description": "Payment"
+        }
+    ]
+}
