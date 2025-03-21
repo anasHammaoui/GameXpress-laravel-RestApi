@@ -43,10 +43,10 @@ class PaymentSuccessfulNotification extends Notification
                     ->line('Thank you for your purchase! Your payment has been successfully processed.')
                     ->line('Order Details:');
 
-        foreach ($this->products as $product) 
-        {
-            $mailMessage->line("{$product['name']} - Quantity : {$product['quantity']}");
-        }
+        // foreach ($this->products as $product) 
+        // {
+        //     $mailMessage->line("{$product['name']} - Quantity : {$product['quantity']}");
+        // }
 
         $mailMessage->line('Montant Total : ' . ($this->paymentIntent->amount_received / 100) . ' ' . strtoupper($this->paymentIntent->currency))
             ->line('Transaction ID : ' . $this->paymentIntent->id)

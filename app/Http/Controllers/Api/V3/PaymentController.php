@@ -61,6 +61,7 @@ class PaymentController extends Controller
     {
         $orderController = new CommandController();
         $orderResponse = $orderController->create();
+        // dd(json_decode($orderResponse->getContent(), true)["data"]);
         $orderData = json_decode($orderResponse->getContent(), true)['data'];
         $order = Orders::where('id' ,$orderData["id"])->with("items")->first();
         $priceData = [];
@@ -91,7 +92,8 @@ class PaymentController extends Controller
                 'cancel_url' => env('APP_URL') . '/api/v3/client/payment/cancel',
                 'metadata'=>  [
                     'order_id' => $orderData["id"],
-                    'products' => json_encode($products)
+                    'products' => json_encode($products),
+                    'user_id' => auth()->user()->id
                 ]
             ]);
 
@@ -178,9 +180,8 @@ class PaymentController extends Controller
             }
 
             $paymentIntent = PaymentIntent::retrieve($session->payment_intent);
-
-            $user = User::find($session->metadata->user_id);
-            
+            $order = Orders::find($session->metadata->order_id);
+            $user = User::find($order->user_id);
             if ($user) 
             {
                 $user->notify(new PaymentSuccessfulNotification($paymentIntent, $products));
