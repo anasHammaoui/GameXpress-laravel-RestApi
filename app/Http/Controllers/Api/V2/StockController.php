@@ -16,20 +16,14 @@ class StockController
     {
         $product = Product::where('id', $product_id)->first();
         if ($product) {
-
             if ($quantity === null || $quantity <= 0) {
                 return false;
             }
-            $cart = Cart::where('product_id', $product_id)->first();
-            if ($cart) {
                 if ($quantity > $product->stock) {
                     return false;
                 } else {
                     return true;
                 }
-            } else {
-                return false;
-            }
         } else {
             return false;
         }

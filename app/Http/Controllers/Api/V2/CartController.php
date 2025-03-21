@@ -24,14 +24,6 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $quantityValidation = StockController::compareToStock($request->product_id, $request->quantity);
-
-        if (!$quantityValidation) {
-            return response()->json([
-                'message' => 'Stock insuffisant',
-            ], 400);    
-        }
-
         $sessionId = $request->header('X-Session-ID') ?? Str::uuid()->toString();
 
         $userId = auth('sanctum')->user()->id ?? null;
@@ -51,10 +43,26 @@ class CartController extends Controller
         $cartItem = $cartQuery->first();
 
         if ($cartItem) {
+            $quantityValidation = StockController::compareToStock($request->product_id, $request->quantity  + $cartItem->quantity);
+
+            if (!$quantityValidation) {
+                return response()->json([
+                    'message' => 'Stock insuffisant',
+                ], 400);    
+            }
+
             $cartItem->quantity += $request->quantity;
             $cartItem->price += $price;
             $cartItem->save();
         } else {
+            $quantityValidation = StockController::compareToStock($request->product_id, $request->quantity);
+
+            if (!$quantityValidation) {
+                return response()->json([
+                    'message' => 'Stock insuffisant',
+                ], 400);    
+            }
+            
             $cartItem = new Cart();
             $cartItem->user_id = $userId;
             $cartItem->session_id = $userId ? null : $sessionId;

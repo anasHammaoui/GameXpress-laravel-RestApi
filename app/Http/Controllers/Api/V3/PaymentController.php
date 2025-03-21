@@ -35,7 +35,7 @@ class PaymentController extends Controller
         $orderController = new CommandController();
         $orderResponse = $orderController->create();
         $orderData = json_decode($orderResponse->getContent(), true)['data'];
-        $order = Orders::find($orderData["id"])->with("items")->first();
+        $order = Orders::where('id' ,$orderData["id"])->with("items")->first();
         $priceData = [];
         $products = [];
         foreach ($order->items as $item) {
@@ -45,7 +45,7 @@ class PaymentController extends Controller
                     'product_data' => [
                         'name' => $item->product->name,
                     ],
-                    'unit_amount' => $item->price * 100,
+                    'unit_amount' => intval((($item->product->price) - (($item->product->price * 0.6)) - 5) + $item->product->price) * 100,
                 ],
                 'quantity' => $item->quantity,
             ];
@@ -74,6 +74,7 @@ class PaymentController extends Controller
     }
     public function cancel()
     {
+        
         return response()->json(["message" => "order canceled"], 422);
     }
     public function success(Request $request)
