@@ -23,7 +23,8 @@ class ProductFactory extends Factory
            'slug' => Str::slug($name) ,
            'price' => $this -> faker -> randomNumber(3,true) ,
            'stock' => $this -> faker -> randomNumber(3,true),
-           'category_id' => Category::inRandomOrder()->first()->id
+        //    'category_id' => Category::inRandomOrder()->first()->id
+           'category_id' => Category::factory()
         ];
     }
 }
