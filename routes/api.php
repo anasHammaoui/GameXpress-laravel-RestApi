@@ -25,10 +25,10 @@ Route::post('/v1/admin/logout',[UserAuthController::class,"logout"]) -> middlewa
 Route::get('/v1/admin/dashboard',[DashboardController::class, 'index']) 
 -> middleware(['auth:sanctum','role:super_admin|product_manager|users_manager']);
 // product managers routes
-Route::middleware(['auth:sanctum','role:product_manager']) -> group(function (){
+Route::middleware(['auth:sanctum','role:super_admin|product_manager']) -> group(function (){
     Route::get('/v1/admin/products',[ProductController::class, 'index']);
     Route::get('/v1/admin/products/{product}',[ProductController::class, 'show']);
-    Route::post('/v1/admin/products',[ProductController::class,'store']);
+    Route::post('/v1/admin/products ',[ProductController::class,'store']);
     Route::put('/v1/admin/products/{product}',[ProductController::class,'update']);
     Route::delete('/v1/admin/products/{id}',[ProductController::class, 'destroy']);
     // categories controller
@@ -78,3 +78,11 @@ Route::delete('/v3/admin/orders/{id}',[CommandController::class,'destroy']) -> m
 
 //transations
 Route::get('/v3/admin/transactions', [PaymentController::class, 'transactions'])->middleware(['auth:sanctum','role:super_admin']);
+
+Route::get('/user', function (Request $request) {
+    return response()->json([
+        'user' => $request->user(),
+        'roles' => $request->user()->getRoleNames()->toArray(),
+        'permissions' => $request->user()->getAllPermissions()->pluck('name')->toArray()
+    ]);
+})->middleware('auth:sanctum');

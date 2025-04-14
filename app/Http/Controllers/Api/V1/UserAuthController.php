@@ -54,9 +54,13 @@ class UserAuthController extends Controller
                 $stockController = new StockController();
                 $stockController->mergeGuestCart($sessionId, $user->id);
             }
+            $user = User::where('email', $request->email)->first();
+            $token = $user->createToken($request->email)->plainTextToken;
             return response()->json([
                 "message" => 'Account created successfully',
                 "role" => $user->roles->first()->name,
+                "access_token" => $token,
+                "user" => $user
             ], 200);
         }
     }
@@ -89,10 +93,11 @@ class UserAuthController extends Controller
             }
         return response()->json([
             "message" => "You loged in successfully",
+            "user" => $user,
             "role" => $user->roles->first()->name,
             "permission" => $user->getAllPermissions(),
             "access_token" => $token
-        ]);
+        ],200);
     }
     // logout funciton
     public function logout()
