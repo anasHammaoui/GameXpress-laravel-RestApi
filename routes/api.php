@@ -26,14 +26,14 @@ Route::get('/v1/admin/dashboard',[DashboardController::class, 'index'])
 -> middleware(['auth:sanctum','role:super_admin|product_manager|users_manager']);
 // product managers routes
 Route::middleware(['auth:sanctum','role:super_admin|product_manager']) -> group(function (){
-    Route::get('/v1/admin/products',[ProductController::class, 'index']);
-    Route::get('/v1/admin/products/{product}',[ProductController::class, 'show']);
     Route::post('/v1/admin/products ',[ProductController::class,'store']);
     Route::put('/v1/admin/products/{product}',[ProductController::class,'update']);
     Route::delete('/v1/admin/products/{id}',[ProductController::class, 'destroy']);
     // categories controller
     Route::resource('/v1/admin/categories', CategoryController::class);
 });
+Route::get('/v1/admin/products',[ProductController::class, 'index']);
+Route::get('/v1/admin/products/{product}',[ProductController::class, 'show']);
 // user manager routes
 Route::resource('/v1/admin/users',UserManageController::class) -> middleware(['auth:sanctum','role:user_manager']);
 

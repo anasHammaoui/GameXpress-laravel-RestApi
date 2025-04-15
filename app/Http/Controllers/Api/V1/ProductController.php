@@ -14,23 +14,21 @@ class ProductController extends Controller
     // show all products
     public function index(){
         // all products
-        if (auth('sanctum') -> user() -> can('view_products')){
+
             $products = Product::with("images")->get();
         return response() -> json([
            "products" => $products,
            "out Of stock" => Product::where('stock',0) -> get()
         ],200);
-        }
+   
         return response() -> json(["message" => "failed to get all products"],403);
     }
     // show a specific prouct
     public function show(Product $product){
-        if (auth('sanctum')-> user() -> can('view_products')){
             $product->load(["category", "images"]);
             return response()->json([
                 "product" => $product,
             ], 200);
-        }
         return response() -> json(['message' => 'failed to get data, you\'re not loged in'],403);
     }
     // add a product 
