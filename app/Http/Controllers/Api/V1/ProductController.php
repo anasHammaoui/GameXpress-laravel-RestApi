@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Product_images;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 class ProductController extends Controller
@@ -14,7 +15,7 @@ class ProductController extends Controller
     public function index(){
         // all products
         if (auth('sanctum') -> user() -> can('view_products')){
-            $products = Product::all();
+            $products = Product::with("images")->get();
         return response() -> json([
            "products" => $products,
            "out Of stock" => Product::where('stock',0) -> get()
@@ -25,9 +26,9 @@ class ProductController extends Controller
     // show a specific prouct
     public function show(Product $product){
         if (auth('sanctum')-> user() -> can('view_products')){
-
-            return response() -> json([
-                "products" => $product,
+            $product->load(["category", "images"]);
+            return response()->json([
+                "product" => $product,
             ], 200);
         }
         return response() -> json(['message' => 'failed to get data, you\'re not loged in'],403);
@@ -54,7 +55,7 @@ class ProductController extends Controller
         foreach($request ->file('images') as $image){
             $imageName = time(). '_'. uniqid().'.' . $image -> getClientOriginalExtension();
             $image -> storeAs('products_images',$imageName,'public');
-            $imageName = 'products_images/'.$imageName;
+            $imageName = Storage::url('products_images/'.$imageName);
             array_push($images,$imageName);
         }
         $product =  Product::create([
@@ -120,7 +121,7 @@ class ProductController extends Controller
             foreach($request ->file('images') as $image){
                 $imageName = time(). '_'. uniqid().'.' . $image -> getClientOriginalExtension();
                 $image -> storeAs('products_images',$imageName,'public');
-                $imageName = 'products_images/'.$imageName;
+                 $imageName = Storage::url('products_images/'.$imageName);
                 array_push($images,$imageName);
             }
             // Delete old images from storage and database
@@ -155,10 +156,17 @@ class ProductController extends Controller
         ],200);
     }
     // delete a product 
-    public function destroy(Product $product){
-        $product -> delete();
-        return response() -> json([
-            "message" => "product has been deleted successfullly"
-        ],200);
+    public function destroy($id){
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        $product->images()->delete();
+        $product->delete();
+
+
+        return response()->json(['message' => 'Product deleted successfully']);
     }
 }
