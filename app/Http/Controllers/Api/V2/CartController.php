@@ -14,7 +14,7 @@ class CartController extends Controller
     public function index()
     {
         // $cart = auth("sanctum")->user()->carts -> load('product');
-        $cart = auth("sanctum")->user()->carts()->with('product.category')->get();
+        $cart = auth("sanctum")->user()->carts()->with('product.category' , 'product.images')->get();
         
         return response()->json($cart);
     }
