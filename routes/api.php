@@ -62,6 +62,9 @@ Route::get('/v2/client/cart',[CartController::class,'index']) -> middleware('aut
 Route::put('/v2/client/cart/{cart_id}',[CartController::class,'update']);
 Route::delete('/v2/client/cart/{cart_id}',[CartController::class,'destroy']);
 
+// add  new route for cart details
+Route::get('/v2/client/cart-details/{user_id}', [CartController::class, 'cartDetails'])
+    ->middleware(['auth:sanctum', 'role:client']);
 
 // ******************   V3  ******************
 // payment
